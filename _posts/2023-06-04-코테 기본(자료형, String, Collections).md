@@ -186,6 +186,17 @@ Integer.toBinaryString(25); -> 25를 이진수로 변환.
 System.out.printf("#%d", test); %d대신 %f를 사용한다.
 소수점 아래자리 6자리까지 출력하고 싶다면, %.6f를 사용하면 된다.
 
+## while문 활용
+
+```
+int N = Integer.parseInt(br.readLine());
+
+while(N-- > 0) // N--가 0보다 클때까지, 즉 N이 0이 될때까지.
+{
+	~~~~~~
+}
+```
+
 ## 그 외 주의
 
 Math.pow(2,N) 등 Math. 연산은 소수형태로 결과가 나오기 때문에 int형으로 변환해야 하는 경우 int를 붙여주어야 함.
