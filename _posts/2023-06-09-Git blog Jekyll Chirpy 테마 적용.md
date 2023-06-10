@@ -1,7 +1,7 @@
 ---
-title: Git blog Jekyll Chirpy 테마 적용
+title: Git blog Jekyll Chirpy 테마 적용 ( /assets/js/dist/.js not found 오류 해결)
 author: leedohyun
-date: 2023-06-07 23:13:00 -0500
+date: 2023-06-08 23:13:00 -0500
 categories: [Git, Blog]
 tags: [git, blog]
 ---
@@ -129,34 +129,93 @@ bundle lock --add-platform x86_64-linux
 
 assets/dist 디렉토리 내에 js 파일이 존재하지 않는다는 뜻인데
 
-로컬 repo에 찾아보니 _javascript 디렉토리 내에 저 파일들이 존재했다.
+초기화 과정이 제대로 수행되지 않아 발생한 문제였다.
 
-404.html과 index.html 파일을 열어보면
+chirpy git에서 issue에 같은 문제를 겪은 사람들이 있어서 해결법을 확인해봤더니 fork방식으로 블로그를 제작하면 해결된다고 했다.
 
-```
-<script defer src = "/assets/js/dist/misc.min.js"></script>
-```
+## fork방식으로 chirpy 블로그 제작
 
-이런 코드들이 있다.
+[Fork Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy/fork) 를 사용하여 소스를 내가 생성한 저장소로 fork 받는다.
 
-```
-<script defer src = "/_javascript/misc.min.js"></script>
-```
+Repository 이름은 사용자이름.github.io로 똑같이 한다.
 
+fork한 후 clone하여 로컬에 repo를 가져온다.
 
-1. 이렇게 js파일을 참조하는 코드를 올바른 경로로 수정한다.
-2. jekyll은 js파일을 처리하는 디렉토리가 정해져있고 _javascript 디렉토리는 해당하는 디렉토리가 아니기 때문에 _config.yml 파일에 코드를 수정해준다.
+이후 아래 명령어를 통해 초기화를 진행한다.
 
 ```
-include:
- - _javascript
+tools/init
 ```
 
-코드를 추가해준다.
+정상적으로 초기화 됐다면 _posts폴더 하위 파일들과 docs 폴더, .travis.yml 파일이 삭제되었을 것이다.
+
+이 때
+
+```
+'NODE_ENV' is not recognized as an internal or external command, ~
+```
+
+오류가 발생할 수 있는데 이는 node.js 설치 후
+
+```
+npm install -g win-node-env
+```
+
+명령어를 통해 해결할 수 있다.
+
+이 후 아래 명령어를 통해 js 파일을 빌드할 수 있고 위의 js not found 오류를 해결할 수 있다.
+
+```
+npm i && npm run build
+```
 
 
+> 로컬에서 실행해보기
+
+우선 jekyll을 로컬에서 실행시키기 위해 터미널에서 아래 명령어를 통해 의존성이 있는 모듈을 모두 설치한다.
+
+```
+bundle
+```
+
+이미 chirpy에 기본설정이 되어 있기 때문에 해당 명령만으로 모든 것이 설치된다.
+
+이후 다음 명령어를 통해 jekyll을 실행시킨다.
+
+```
+jekyll serve
+```
+
+> 빌드
+
+빌드 시
+
+![image](https://blog.kakaocdn.net/dn/6GK1S/btsjtzIUEHh/1PcPGNSzAp571Bx2f93kZk/img.png)
+
+이런 오류가 발생할 수 있는데 이는
+
+```
+git push origin +master
+```
+
+명령어를 통해 해결할 수 있다.
+
+또 빌드가 js 파일을 찾을 수 없다며 실패했는데 git을 확인해보니 정상적으로 js파일이 빌드되어  assets/js/dist 디렉토리에 js 파일들이 생겼는데도 assets 폴더가 제대로 git에 올라가지 않아 발생한 문제였다.
+
+따라서 직접 올리기로 하였다.
+
+![image](https://blog.kakaocdn.net/dn/zO8uh/btsjllZu0kH/DG3TSGou3AyQ2OBct79ixK/img.png)
+
+git의 Upload files를 이용해 직접 assets 폴더를 올렸고 정상적으로 빌드된 것을 확인했다.
 
 ## 마무리
 
-build는 약 5분정도 소요되며
+build는 약 5분정도 소요되며 빌드가 정상적으로 이루어질 경우
 
+사용자이름.github.io 링크로 들어갔을 때
+
+홈페이지가 정상적으로 보이게 된다.
+
+새로운 게시물을 올리고싶다면
+
+_posts폴더에 md파일을 올리면 된다.
