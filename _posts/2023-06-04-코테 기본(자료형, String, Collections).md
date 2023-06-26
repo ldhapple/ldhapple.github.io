@@ -62,26 +62,60 @@ arrlist.stream().mapToInt(Integer::intValue).toArray();
 arrlist.stream().mapToInt(x -> x).toArray();
 ```
 
-## queue, stack
+## queue, stack, deque
 
 - queue
 
 ```
 FIFO.
+Queue<Integer> queue = new LinkedList<>();
 [1,2,3,4,5]가 있으면
 queue.poll() 했을 때 -> [2,3,4,5] // queue.poll() == 1
 queue.add(7)하면 -> [2,3,4,5,7]
 queue.peek() == 2
+queue.offer(7) 
+// add와 같이 추가하는 함수이지만 add는 추가할 수 없는 경우 예외를 발생시키고
+offer는 추가할 수 없을 때 false를 반환한다.
+```
+
+```
+Queue<int[]> queue = new LinkedList<>();
+queue.offer(new int[]{ i, num});
+//이렇게 배열을 queue에 집어넣을 수 있는데
+단순히 집어넣는 num값과 함께 몇번째인지 나타내는 i같은 값을
+넣어야 한다면 이런식으로 활용가능하다.
+
+map과 같이 key, value 느낌으로 활용 가능.
+//백준 프린터큐
 ```
 
 - stack
 
 ```
 FILO.
+Stack<Integer> stack = new Stack<>();
 [1,2,3,4,5]가 있으면
 stack.pop() 했을 때 -> [1,2,3,4] // stack.pop() == 5
 stack.add(7) 하면 -> [1,2,3,4,7]
 stack.peek() == 7
+```
+
+- deque
+
+```
+stack으로도 queue로도 활용할 수 있음.
+양방향 접근 가능.
+
+Deque<Integer> deque = new ArrayDeque<>();
+deque.add() // addLast()가 기본
+addFirst() addLast() 존재
+
+deque.peek() //
+
+LinkedList<Integer> deque = new LinkedList<>();
+//이렇게 덱을 이용하면 index도 접근할 수 있고, deque의 기능도 사용 가능.
+ex) deque.indexOf(num);
+
 ```
 
 ## 문자열 접근
