@@ -154,7 +154,10 @@ a{2,4} a 2개 이상 4개 이하
 ab|cd ab 또는 cd 
 ^a 문자열의 처음문자가 a
 a$ 문자열의 마지막 문자가 a
-\\. 
+\\. 특수문자는 [\\.] 이런식으로 앞에 \\ 붙여줘야 함.
+
+str.replaceAll(~); 로 하면 적용안되고
+str = str.replaceAll(~); 로 해야 적용.
 ```
 
 ## isStringNumber(String s)
@@ -229,6 +232,18 @@ while(N-- > 0) // N--가 0보다 클때까지, 즉 N이 0이 될때까지.
 {
 	~~~~~~
 }
+```
+
+## Math 연산
+
+```
+Math.pow(int N, int n) // N의 n승
+Math.ceil(double n) //n의 올림
+Math.floor(double n) //n의 내림
+Math.round(double num) // 소수 num의 첫째자리 반올림 (1.5 -> 2)
+Math.round(num * 10) / 10.0; // 소수점 둘째자리 반올림 (1.45 -> 1.5)
+-> String.format("%.1f", num) 같은 형식으로 원하는 소숫점 자리까지 출력 가능.
+Math.abs(double n) // n의 절댓값
 ```
 
 ## 그 외 주의
