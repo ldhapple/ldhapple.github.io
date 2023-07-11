@@ -49,6 +49,13 @@ Integer[] arr = set.toArray(new Integer[set.size()]);
 이렇게 배열로 바꾸어서 index로 접근 가능.
 ```
 
+- 중복된 원소만 구하기
+
+```
+set.retainAll(set_B); //set과 set_B의 공통된 요소만 남기고 다 지운다.
+```
+
+
 ## Stream
 
 ```
@@ -137,6 +144,13 @@ String str1 = Integer.toString(1234);
 String str1 = String.valueOf(char, int, ...);
 int a = Integer.ParseInt(str1);
 //아스키코드 - 'A' = 65 / 'a' = 97 / 'z' = 127 / '0' = 48 ---> <result - '0'>
+str.startsWith(another_str); // str이 another_str로 시작하는지 확인
+//str=abc / another_str = abcd / true
+//str=abc / another_str = acb / false
+//즉 charAt(0~n)까지 계속 비교해준다고 보면 됨.
+//str.indexOf(another_str) == 0 으로도 체크 가능, 
+//abc / ab라고 할 때 startsWith()는 ab를 abc로 시작한다고 체크하지 못함. 하지만 abc에서 ab를 indexOf로 할 경우 0이 나오게 됨.
+str.endsWith(another_str); //str이 another_str로 끝나는지 확인
 ```
 
 ## replaceAll 정규식
