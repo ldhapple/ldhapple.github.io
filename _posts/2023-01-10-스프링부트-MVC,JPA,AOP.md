@@ -1,7 +1,7 @@
 ---
 title: 웹 MVC 개발 + DB 접근 + AOP
 author: leedohyun
-date: 2023-01-10 23:13:00 -0500
+date: 2023-07-10 23:13:00 -0500
 categories: [JAVA, Spring, Spring-Boot]
 tags: [java, Spring, SpringBoot]
 ---
@@ -34,7 +34,7 @@ public class MemberController {
 	    memberService.join(member);  
   
 	   return "redirect:/";  
-  }
+	}
   
 	@GetMapping("/members")  // 조회
 	public String list(Model model){  
@@ -80,14 +80,36 @@ public class MemberForm {
 ```
 
 ** form 태그의 method = "post" action = "/members/new"
+
 form을 제출 했을 때 해당 URL에 post방식으로 전송한다.
--> @PostMapping: 데이터를 Form같은 곳에 넣어서 전달할 때 사용.
+
+### @PostMapping
+@PostMapping: 데이터를 Form같은 곳에 넣어서 전달할 때 사용.
+
 데이터를 등록할 때 사용하게 된다.
+
 @GetMapping은 주로 조회할 때 사용한다.
 
 # DB 접근
 
-## JdbcTemplate
+환경설정
+
+```
+//build.gradle
+
+implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+runtimeOnly 'com.h2database:h2'
+```
+
+```
+//resources/application.properties에
+
+spring.datasource.url=jdbc:h2:tcp://localhost/~/test  //h2 db 열 때 사용했던 주소
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa //h2 db의 username
+```
+
+## JdbcTemplate (얘도 실무에서 많이 사용 함)
 
 스프링 JdbcTemplate와 MyBatis 같은 라이브러리는 JDBC API에서 본 반복 코드를 대부분 제거해준다. 하지만 SQL은 직접 작성해야 한다.
 
@@ -100,6 +122,9 @@ public class JdbcTemplateMemberRepository implements MemberRepository{
   
     @Autowired  
     public JdbcTemplateMemberRepository(DataSource dataSource){  
+		/*DataSource는 데이터베이스 커넥션을 획득할 때 사용하는 객체이다.
+		스프링 부트는 데이터베이스 커넥션 정보를 바탕으로 DataSource를 생성하고 스프링 빈으로 만들어둔다.*/
+		
         this.jdbcTemplate = new JdbcTemplate(dataSource);  
     }  
   
@@ -199,10 +224,39 @@ spring.jpa.hibernate.ddl-auto=none
 - show-sql: JPA가 생성하는 SQL을 출력한다.
 - ddl-auto: JPA는 테이블을 자동으로 생성하는 기능을 제공하는데 none을 사용하면 해당 기능을 끈다.
 	- create를 사용하면 엔티티 정보를 바탕으로 테이블도 직접 생성해준다.
+	
+### @Entity, @Id, @Column
 
-1. @Entity 어노테이션을 통해 Member domain을 테이블과 연결할 수 있다.
+1. @Entity 어노테이션을 통해 Member domain을 DB 테이블과 연결할 수 있다.
 2. @Id @GeneratedValue(strategy = GenerationType.IDENTITY) 어노테이션을 통해 자동으로 DB가 생성하는 ID를 매핑할 수 있다.
 3. @Column(name = "username") String name; 이면 name을 DB의 username 컬럼에 매핑한다.
+
+- Model/Member
+
+```
+@Entity
+public class Member{
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) //자동으로 생성하는 id와 매핑
+	private Long id;
+	
+	private String name;
+	
+	public Long getId(){
+		return id;
+	}
+	
+	public void setId(Long id){
+		this.id = id;
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public void setName(String name){
+		this.name = name;
+	}
+```
 
 - JpaMemberRepository
 
@@ -210,13 +264,15 @@ spring.jpa.hibernate.ddl-auto=none
 public class JpaMemberRepository implements MemberRepository{  
   
     private final EntityManager em;  
-  
+	//현재 DB와 연결해서 관리를 하는 EntityManager를 스프링부트에서 생성해주고 얘를 주입받아 사용해야 함.  
+	
 	public JpaMemberRepository(EntityManager em){  
         this.em = em;  
     }  
+	
     @Override  
     public Member save(Member member) {  
-        em.persist(member);  
+        em.persist(member);  //영구 저장하다 => persist
 	    return member;  
     }  
   
@@ -257,7 +313,7 @@ public class JpaMemberRepository implements MemberRepository{
 ```
 public interface SpringDataJpaMemberRepository extends JpaRepository<Member, Long>, MemberRepository {  
       @Override  
-	  Optional<Member> findByName(String name);  
+	  Optional<Member> findByName(String name);  //구현클래스 없어도 사용 가능.
 }
 ```
 
@@ -331,8 +387,9 @@ class MemberServiceIntegrationTest {
 	}
 ```
 
-** 이제 DB와 연결되었기 때문에 @AfterEach로 clear를 할 필요 없고
-스프링 빈으로 객체들을 관리하기 때문에 @Autowired를 사용해 객체를 내려받는다. @BeforeEach로 하나의 객체를 참조할 필요 없다.
+** 이제 DB와 연결되었기 때문에 @AfterEach로 clear를 할 필요 없고(@Transactional 덕분) 스프링 빈으로 객체들을 관리하기 때문에 @Autowired를 사용해 객체를 내려받는다. @BeforeEach로 하나의 객체를 참조할 필요 없다.
+
+### @SpringBootTest, @Transactional
 
 - @SpringBootTest: 스프링 컨테이너와 테스트를 함께 실행한다.
 - @Transactional: 테스트 케이스에 이 어노테이션이 있으면, 테스트 시작 전에 트랜잭션을 시작하고, 테스트 완료 후에 항상 롤백한다. DB에 데이터가 남지 않으므로 이 어노테이션 덕분에 @AfterEach를 하지 않아도 되는 것이다. (Service 등에 붙으면 롤백하지 않는다.)
@@ -376,6 +433,9 @@ public class TimeTraceAop {
 ```
 
 **  @Aspect 어노테이션 사용해야 함.
+
+### @Aspect, @Around
+
 @Around 어노테이션으로 Aop 적용 범위 지정
 hello.hellospring 이라는 프로젝트 명 하위의 모두에게 적용한다는 뜻
 ex) hello.hellospring.service.. 이면 service 하위에만 찍힘.
