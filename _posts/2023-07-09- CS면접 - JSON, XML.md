@@ -2,7 +2,7 @@
 title: CS면접 - JSON, XML
 author: leedohyun
 date: 2023-07-09 23:13:00 -0500
-categories: [CS]
+categories: [CS, 개발자 필수지식]
 tags: [CS, 개발자 필수지식]
 ---
 
@@ -49,6 +49,7 @@ console.log(b[1].name.firstname) //접근
 여러 언어에서 사용되어 지는데 그 이유는 '독립적' 이기 때문이다.
 
 json in js = js object
+
 json in python = dict
 
 이렇게 객체나 해시테이블, 딕셔너리 등으로 변환되어 쓰이게 된다.
@@ -140,6 +141,7 @@ json 파일로 만든다.
 ### XML의 활용
 
 sitemap.xml로 쓰인다.
+
 내가 만든 사이트를 상위에 노출시키려면 내 사이트의 페이지 정보가 최대한 많이 검색사이트에 제공되어져야 하는데 이 때 검색사이트의 크롤링봇이 알아서 내 사이트의 정보를 잘 긁어갈 수 있도록 sitemap을 제공해야 한다. 이 때 xml파일 형식을 사용한다.
 
 여러 언어에서도 독립적으로 사용된다.
