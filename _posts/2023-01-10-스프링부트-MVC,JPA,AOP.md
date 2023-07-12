@@ -2,7 +2,7 @@
 title: 웹 MVC 개발 + DB 접근 + AOP
 author: leedohyun
 date: 2023-07-10 23:13:00 -0500
-categories: [JAVA, Spring, Spring-Boot]
+categories: [JAVA, Spring, Spring-Boot 입문]
 tags: [java, Spring, SpringBoot]
 ---
 
