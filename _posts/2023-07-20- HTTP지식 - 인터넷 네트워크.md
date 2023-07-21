@@ -1,0 +1,173 @@
+---
+title: HTTP 웹 지식 - 인터넷 네트워크
+author: leedohyun
+date: 2023-07-20 22:13:00 -0500
+categories: [JAVA, HTTP 웹 기본지식]
+tags: [java, Spring, SpringBoot]
+---
+
+## 인터넷 네트워크
+
+- 인터넷 통신
+- IP
+- TCP, UDP
+- PORT
+- DNS
+
+### 인터넷 통신
+
+인터넷 상에서 컴퓨터 둘은 어떻게 통신할까?
+
+![](https://blog.kakaocdn.net/dn/bqacoi/btsowXM4kg0/V0O0rKgiyeXEvpYKvMw630/img.png)
+
+수 많은 노드를 거쳐서 서버까지 도달해야 한다. 
+
+데이터가 인터넷에서 어떤 규칙으로, 어떻게 넘어갈까?
+
+## IP(인터넷 프로토콜)
+
+- IP의 역할
+	- 지정한 IP 주소에 전달.
+	- 패킷이라는 통신 단위로 데이터 전달.
+
+> 패킷?
+
+![](https://blog.kakaocdn.net/dn/8LB9o/btsoyqU0ysy/4lghRXnTPG9RViKXMdVQUK/img.png)
+
+전송에 필요한 정보와 데이터를 담은 하나의 단위.
+
+![](https://blog.kakaocdn.net/dn/wCWba/btsowb6fx3w/AxKtku0NixvHLt7Z8UOTf1/img.png)
+
+이렇게 클라이언트가 패킷에 정보를 담아 서버에 전달하고 서버에서도 다시 패킷으로 전달할 수 있다. 이 때 거치는 노드는 서로 다를 수 있다.
+
+![](https://blog.kakaocdn.net/dn/bWLpVC/btsoxXFxCoi/tg9uOKSZEAKioDjJY9FVT0/img.png)
+
+### IP 프로토콜의 한계
+
+- 비연결성
+	- 패킷을 받을 대상이 없거나 서비스 불능 상태여도 패킷 전송
+- 비신뢰성
+	- 중간에 패킷이 사라진다면?
+	- 패킷이 순서대로 오지 않는다면?
+- 프로그램 구분
+	- 같은 IP를 사용하는 서버에서 통신하는 애플리케이션이 둘 이상이면?
+
+![](https://blog.kakaocdn.net/dn/KKShZ/btsoyWlPi4y/wOndVxTMSFSavyNKjaHHe0/img.png)
+
+![](https://blog.kakaocdn.net/dn/chZD02/btsows7DQlS/tmC27kSyCEHbofYozdqKq1/img.png)
+
+1500바이트가 넘으면 MTU가 초과하는 것이라 패킷을 분할하게 되는데 이 과정에서 순서가 변할 수 있다.
+
+## TCP, UDP
+
+위의 IP 프로토콜의 한계점을 보완해준다.
+
+UDP는 그런걸 해결해주지는 않지만 도움되는 부분이 있다.
+
+![](https://blog.kakaocdn.net/dn/OCfES/btsoxa6uF0R/qcLJNd6qv1Nw1RWMDcbMs1/img.png)
+
+이렇게 4계층을 자세히 들여다보면 아래와 같은 형태로 표현할 수 있다.
+
+![](https://blog.kakaocdn.net/dn/EDPHN/btsowYrG2Y1/81FdvFrSRrUI6nWYlAspK1/img.png)
+
+![](https://blog.kakaocdn.net/dn/cOGpKQ/btsoxaMaH4G/tttVvMSh9se6rrQsUq5zWK/img.png)
+
+각 계층을 지나며 각각의 헤더를 계속 추가하게 되고 마지막에 이더넷 프레임을 추가해 랜카드를 거쳐 서버로 전달된다.
+
+> TCP 세그먼트 안에 있는 정보?
+
+![](https://blog.kakaocdn.net/dn/2MQCA/btsoxH352Eg/kvnNEFvQdKXsKf8yCoGkaK/img.png)
+
+전송 제어, 순서, 검증 정보등도 들어있기 때문에 위의 순서 문제를 해결할 수 있다.
+
+### TCP (Transmisiion Control Protocol)
+
+- 연결지향 - TCP 3 way handshake (가상 연결)
+- 데이터 전달을 보증한다.
+- 순서를 보장한다.
+
+신뢰할 수 있는 프로토콜이며 현재 대부분 TCP를 사용한다.
+
+> 3 way handshake
+
+![](https://blog.kakaocdn.net/dn/twH4M/btsozkmFVXq/ZhrSPwJAz5ztAHkofUGcH0/img.png)
+
+SYN - syncronize. 접속 요총
+
+ACK - SYN에 대한 대답. 요청 수락. ACK와 함께 데이터 전송 가능.
+
+만약 서버가 꺼져있으면 SYN을 보냈을 때 응답 (ACK)가 없기 때문에 전송을 안할 수 있음.
+
+> 데이터 전달 보증?
+
+![](https://blog.kakaocdn.net/dn/dUgmyE/btsoxqO22Yo/KsiHpZZSzxrEkoreti8nUK/img.png)
+
+TCP 세그먼트 내부의 내용을 바탕으로 이런 것이 가능하다.
+
+### UDP (User Datagram Protocol)
+
+- 하얀 도화지에 비유(기능이 거의 없음)
+- 연결지향 - 3 way handshake X
+- 데이터 전달 보증 X
+- 순서 보장 X
+- 하지만 단순하고 빠름.
+
+IP와 별로 다를게 없는데?
+
+> 특징
+
+- 포트와 체크섬이 추가되어 있다.
+
+포트는 하나의 IP에서 여러 애플리케이션(ex - 음악 & 게임)이 구동되어 있을 때, 구분할 수 있도록 해준다. (음악어플에 보낼 패킷, 게임어플에 보낼 패킷)
+
+체크섬은 오류검증을 위한 값이다.
+
+### 정리
+
+일단은 TCP가 90%이상 점유하고 있지만 HTTP3으로 넘어오면서 3 way handshake 과정까지 없애서 최적화해보자 라는 기조로 UDP 사용률이 점점 늘어가는 상황이다.
+
+## PORT
+
+한번에 둘 이상 연결해야 한다면?
+
+![](https://blog.kakaocdn.net/dn/bJFopX/btsoyYRu6Qv/nj1kjbHPyjoNVLQDKTvgA1/img.png)
+
+위와 같은 상황이면 하나의 클라이언트가 여러 개의 서버와 통신해야 한다. 패킷들이 서버로부터 다시 클라이언트에게 올텐데 그 패킷들이 각각 어떤 애플리케이션을 위한 패킷인지 어떻게 구분하는지의 문제가 생긴다.
+
+![](https://blog.kakaocdn.net/dn/xTQtJ/btsoyoCVHjj/AYi1iDcHnMAoNR5RVjEaF1/img.png)
+
+위에서 언급했듯이 출발지, 도착지의 IP정보를 IP패킷에서 담고, 각각의 포트정보를 TCP 세그먼트에 담는다.
+
+![](https://blog.kakaocdn.net/dn/cQZeUQ/btsoxbdh6ra/HSrC7KKHAldKOBbWjzklkk/img.png)
+
+게임의 포트 8090, 화상통화 21000, 웹 브라우저 10010 이런식으로 포트번호가 되어있다.
+
+예를 들면 클라이언트가 게임서버에 연결하려면 200.200.200.2에 있는 11220 포트에 연결하는 것이다. 서버입장에서는 8090포트에서 온 것을 인지하고 있기때문에 응답을 그 포트로 보내게 된다.
+
+> 포트 정리
+
+- 0 ~ 65535 할당 가능
+- 0 ~ 1023 : 잘 알려진 포트. 따라서 사용하지 않는 것이 좋다.
+	- FTP : 20, 21
+	- TELNET : 23
+	- HTTP : 80
+	- HTTPS : 443
+
+ 
+## DNS
+
+IP는 기억하기 어렵다. 그리고 변경이 가능하다.
+
+![](https://blog.kakaocdn.net/dn/BwyhX/btsozSwKbK9/PAP0T1XRrbW6Nz7TQYYLUK/img.png)
+
+그래서 DNS(Domain Name System)가 있다.
+
+도메인 네임 시스템
+
+- 전화번호부
+- 도메인 명을 IP 주소로 변환한다.
+
+![](https://blog.kakaocdn.net/dn/crDoFC/btsov4sq55C/TaJRfDTDCbwUF4GXAdIhT0/img.png)
+
+이러한 구조로 기억이 힘들다는 점을 해결하고 IP 주소의 변경에 대처 가능하다.
+
