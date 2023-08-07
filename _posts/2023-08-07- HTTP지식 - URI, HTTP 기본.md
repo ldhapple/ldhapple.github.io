@@ -1,7 +1,7 @@
 ---
 title: HTTP 웹 지식 - 인터넷 네트워크
 author: leedohyun
-date: 2023-07-20 22:13:00 -0500
+date: 2023-08-07 22:13:00 -0500
 categories: [JAVA, HTTP 웹 기본지식]
 tags: [java, Spring, SpringBoot]
 ---
