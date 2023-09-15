@@ -2,7 +2,7 @@
 title: HTML, HTTP API, CSR, SSR
 author: leedohyun
 date: 2023-09-05 19:13:00 -0500
-categories: [JAVA, 스프링 MVC]
+categories: [JAVA, 스프링 MVC 기본]
 tags: [java, Spring, SpringBoot]
 ---
 
