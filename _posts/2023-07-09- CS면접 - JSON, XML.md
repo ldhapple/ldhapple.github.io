@@ -1,5 +1,5 @@
 ---
-title: CS면접 - JSON, XML
+title: JSON, XML
 author: leedohyun
 date: 2023-07-09 23:13:00 -0500
 categories: [CS, 개발자 필수지식]

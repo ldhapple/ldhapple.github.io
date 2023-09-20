@@ -1,5 +1,5 @@
 ---
-title: CS면접 - 디자인 패턴 (전략패턴, 옵저버 패턴, 프록시 패턴, MVC, flux 패턴)
+title: 전략패턴, 옵저버 패턴, 프록시 패턴, MVC, flux 패턴
 author: leedohyun
 date: 2023-07-16 20:13:00 -0500
 categories: [CS, 디자인패턴]
