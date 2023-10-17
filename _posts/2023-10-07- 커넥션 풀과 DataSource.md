@@ -2,7 +2,7 @@
 title: 커넥션 풀과 DataSource
 author: leedohyun
 date: 2023-10-07 23:13:00 -0500
-categories: [Spring, 데이터베이스 기본]
+categories: [Spring, 데이터베이스 접근 기술 기본]
 tags: [java, Spring, SpringBoot]
 ---
 
