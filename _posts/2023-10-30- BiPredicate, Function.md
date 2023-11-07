@@ -1,5 +1,5 @@
 ---
-title: BiPredicate, Function<>
+title: BiPredicate, Function
 author: leedohyun
 date: 2023-10-30 20:13:00 -0500
 categories: [JAVA, 정리]
@@ -148,7 +148,7 @@ System.out.println(predicate1.or(predicate2).test(10, 10);
 //true
 ```
 
-## Function<>
+## Function
 
 ```java
 @FunctionalInterface  
