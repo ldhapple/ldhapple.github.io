@@ -1,5 +1,5 @@
 ---
-title: @ParameterizedTest + private 메서드의 테스트에 관해
+title: ParameterizedTest, private 메서드의 테스트에 관해
 author: leedohyun
 date: 2023-11-02 19:13:00 -0500
 categories: [JAVA, 정리]
