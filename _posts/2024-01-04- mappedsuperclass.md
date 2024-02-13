@@ -1,5 +1,5 @@
 ---
-title: @MappedSuperclass
+title: MappedSuperclass
 author: leedohyun
 date: 2024-01-04 21:13:00 -0500
 categories: [Spring, JPA 기본]
