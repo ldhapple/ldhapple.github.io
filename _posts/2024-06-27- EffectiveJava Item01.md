@@ -1,181 +1,159 @@
 ---
-title: Controller 테스트에서 만난 오류 (csrf, HttpMessageNotReadableException)
+title: Effective Java 시작하기 + Item 1 (생성자 대신 정적 팩토리 메서드를 고려하라)
 author: leedohyun
-date: 2024-04-16 21:13:00 -0500
-categories: [사이드 프로젝트, recommtoon.com]
-tags: [recommtoon.com, SpringBoot]
+date: 2024-06-27 18:13:00 -0500
+categories: [Java, Effective-Java]
+tags: [Java, Effective Java]
 ---
 
-## 개요
+현재 유레카라는 과정을 교육받고 있는데 내가 아는 내용이 많은 교육 초반부, 최종적으로 프로젝트를 진행하기 전 더 나은 구조와 설계를 가진 프로젝트를 만들려는 노력이 있는 것이 좋을 것 같아 Effective-Java 책의 내용을 읽으며 정리해보려고 한다.
+
+이 책은 효율적인 자바 코드를 작성하기 위한 방법들을 소개해준다. 아이템이라는 것으로 각각의 방법이 분류 되어있다.
+
+한달 정도의 기간동안 90개의 아이템 중 정리가 필요하다고 생각되는 아이템들을 정리해보려고 한다.
+
+우선 많이들 알고 많이 정리되어 있는 아이템 1이다. 생성자 대신 정적 팩토리 메서드를 사용했을 때의 장점들을 알아보자.
+
+## 생성자 대신 정적 팩토리 메서드를 고려하라.
+
+우선 이 말의 뜻은 클라이언트에 우리가 흔히 사용하고 습관적으로 사용하는 public 생성자가 아닌 정적 팩토리 메서드를 제공하는 것을 고려하자는 뜻이다.
+
+생성자 + 정적 팩토리 메서드를 제공해도 좋다.
 
 ```java
-@Operation(summary = "웹툰 정보 가져오기")  
-@ApiResponses(value = {  
-  @ApiResponse(responseCode = "200", description = "웹툰 정보 조회 성공", content = @Content(schema = @Schema(implementation = CommentResponseDto.class))),  
-  @ApiResponse(responseCode = "400", description = "해당 웹툰이 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ApiError.class))),  
-  @ApiResponse(responseCode = "401", description = "로그인이 필요합니다.", content = @Content(schema = @Schema(implementation = ApiError.class)))  
-})  
-@PostMapping("/new/{titleId}")  
-public ApiSuccess<CommentResponseDto> createComment(@PathVariable String titleId,  
-		  @RequestBody CommentRequestDto commentRequestDto,  
-		  Authentication authentication) { 
-   
-  String username = authentication.getName();  
-  CommentResponseDto createdComment = commentsService.createComment(commentRequestDto, titleId, username);  
-  
-  return ApiUtil.success(createdComment);  
+public static Timer createTimer(int hour, int min) {
+	//...
+	
+	return new Timer(hour, min, 0);
 }
 ```
 
-CommentsController의 일부 메서드이다.
+위의 예시처럼 어떤 객체의 생성을 생성자가 아닌 정적 메서드를 통해 하는 것을 정적 팩토리 메서드라고 한다.
 
-이번 포스트에서는 위 메서드의 테스트 코드를 작성하면서 마주했던 문제들에 대해 정리해보고자 한다.
+이러한 정적 팩토리 메서드를 사용하면 장점과 단점이 모두 존재한다. 우선 고려해보라고 하는 이유인 장점들을 보자.
 
-## 문제1 - CSRF 문제
+## 장점
+
+### 1. 이름을 가질 수 있다.
 
 ```java
-@Test  
-@DisplayName("댓글 생성 성공 테스트")  
-@WithMockUser("user1")  
-void testCreateComment() throws Exception {  
-  
-  String username = "username";  
-  String titleId = "titleId";  
-  
-  CommentRequestDto commentRequestDto = new CommentRequestDto();  
-  commentRequestDto.setContent("content");  
-  
-  CommentResponseDto commentResponseDto = CommentResponseDto.builder()  
-		  .id(0L)  
-		  .nickName("nickName")  
-		  .likeCount(0L)  
-		  .content(commentRequestDto.getContent())  
-		  .writeTime("writeTime")  
-		  .build();  
-  
-  given(commentsService.createComment(commentRequestDto, titleId, username)).willReturn(commentResponseDto);  
-
-  mockMvc.perform(post("/api/comments/new/{titleId}", titleId))  
-		  .andExpect(status().isOk())  
-		  .andExpect(jsonPath("$.response").exists());  
+public Timer(int hour, int min, int sec) {
+	//...
 }
 ```
 
-컨트롤러 테스트에서 나는 @WebMvcTest를 이용하여 코드를 작성하기로 결정했다.
+보통 위와 같은 생성자가 기본 생성자이다. 이러한 생성자에서 얻을 수 있는 정보는 객체를 생성할 때 전달하는 매개변수, 그리고 생성자 자체이다.
 
-그리고 MockMvc를 사용하여 해당 컨트롤러 메서드 엔드포인트에 대해 테스트 코드를 작성했다.
+이러한 기본 생성자는 반환(생성)되는 객체의 특성을 제대로 설명하지 못한다.
 
-그런데 위와 같이 작성했을 때 403 error가 발생했다.
-
-분명 나는 이전 포스트에서 정리한 @WithMockUser를 사용해 인증에 대한 문제를 해결하고자 했는데, 403 에러가 발생해서 당황스러웠다.
-
-로그를 확인해도 권한이 잘 생성되어 있는 모습을 확인할 수 있었다.
-
-***검색을 해보니 CSRF 관련 문제였다.***
-
-### CSRF?
-
-- 공격자가 악의적인 코드를 심어놓은 사이트를 만들고, 로그인 된 사용자가 클릭하게 만들어 사용자 의지와 무관한 요청을 발생시키는 공격.
-
-스프링 시큐리티에서는 이를 해결하기 위해 "CSRF 토큰"을 이용해 토큰 값을 비교해 일치하는 경우에만 메서드를 처리하도록 만든다.
+그런데 정적 팩토리 메서드를 이용하면 객체의 특성을 직관적으로 설명할 수 있다.
 
 ```java
-mockMvc.perform(post("/api/comments/new/{titleId}", titleId)    
-			   .with(csrf()))  
-	   .andExpect(status().isOk())  
-	   .andExpect(jsonPath("$.response").exists());
-```
-
-위와 같이 with(csrf())를 추가해주면 문제는 해결된다.
-
-_csrf 값을 같이 보내주어 해당 문제가 발생하지 않도록 하는 것이다.
-
-## 문제2 - Required request body is missing
-
-위 문제를 해결하니 이번에는 400 에러가 발생하는 모습을 볼 수 있었다.
-
-에러 메시지를 확인하니 "Required request body is missing" 에러를 만날 수 있었다.
-
-나는 Mock의 given에서 RequestDto를 정상적으로 넣어준다고 생각했는데 로그를 보니 body에 아무런 값이 들어가있지 않았다.
-
-![](https://blog.kakaocdn.net/dn/cuVAHi/btsHhrwkpX9/KwrzG2AJuZB18KeyNAAXTK/img.png)
-
-그렇다면 어떻게 값을 넣어줄 수 있을까?
-
-### 해결방법
-
-```java
-ObjectMapper objectMapper = new ObjectMapper();  
-String requestBody = objectMapper.writeValueAsString(commentRequestDto);
-
-mockMvc.perform(post("/api/comments/new/{titleId}", titleId)    
-			   .contentType(MediaType.APPLICATION_JSON)  
-			   .content(requestBody)
-			   .with(csrf()))  
-	   .andExpect(status().isOk())  
-	   .andExpect(jsonPath("$.response").exists());
-```
-
-위와 같이 commentRequestDto를 ObjectMapper를 이용해 JSON 문자열로 변환해주고, 타입을 JSON으로 변경하여 해결했다.
-
-Spring Mvc Test에서는 자동으로 객체를 JSON으로 변환해 요청 본문에 추가해주지 않는다고 한다.
-
-@RequestBody를 사용하는 메서드의 테스트에서는 직접 객체를 JSON으로 바꿔주는 작업이 필요하다.
-
-
-## 문제3 - ResponseBody에 아무런 내용이 없음
-
-이제 모든 문제가 해결되고 200 응답을 받아냈다.
-
-그런데 응답 바디값의 검증을 하려했는데 응답 바디에 아무런 값이 들어가지 않았다.
-
-문제는 컨트롤러의 메서드에서 찾을 수 있었다.
-
-컨트롤러의 메서드를 보면 Authentication을 매개변수로 사용하고 있다.
-
-하지만 해당 값이 주어지지 않아 응답은 200이지만 응답 바디에는 제대로 된 값이 들어가지 않는 것이었다.
-
-### 해결
-
-```java
-@Test  
-@DisplayName("댓글 생성 성공 테스트")  
-@WithMockUser("user1")  
-void testCreateComment() throws Exception {  
-  
-  String username = "username";  
-  String titleId = "titleId";  
-  
-  CommentRequestDto commentRequestDto = new CommentRequestDto();  
-  commentRequestDto.setContent("content");  
-  
-  CommentResponseDto commentResponseDto = CommentResponseDto.builder()  
-		  .id(0L)  
-		  .nickName("nickName")  
-		  .likeCount(0L)  
-		  .content(commentRequestDto.getContent())  
-		  .writeTime("writeTime")  
-		  .build();  
-  
-  given(commentsService.createComment(commentRequestDto, titleId, username)).willReturn(commentResponseDto);  
-  
-  ObjectMapper objectMapper = new ObjectMapper();  
-  String requestBody = objectMapper.writeValueAsString(commentRequestDto);  
-  
-  mockMvc.perform(post("/api/comments/new/{titleId}", titleId)  
-				  .contentType(MediaType.APPLICATION_JSON)  
-				  .content(requestBody)  
-				  .with(csrf())  
-				  .with(user(username)))  
-		  .andExpect(status().isOk())  
-		  .andExpect(jsonPath("$.response").exists());  
+public static Timer createTimerWithoutSec(int hour, int min) {
+	//...
+	
+	return new Timer(hour, min, 0);
 }
 ```
 
-최종적인 테스트 코드는 위와 같다.
+위와 같이 단순한 예시만으로도 객체를 생성하는데, 어떤 객체가 생성되는지 네이밍만으로 파악하기 용이해진다.
 
-.with(user(username))을 이용해 Authentication에 해당하는 부분을 충족시킬 수 있었다.
+더해 기본 생성자는 하나의 시그니처로 여러 생성자를 만들 수 없다. 이 말은 똑같은 타입을 파라미터로 받는 생성자를 두 개 이상 만들 수 없다는 뜻이다.
 
-이렇게 해주면 Authentication 개체를 매개변수로 기대하는 메서드에서 테스트 실행 중 지정된 사용자 이름으로 해당 개체를 수신하게 된다.
+```java
+public Timer(int hour)
+public Timer(int min)
 
-결과적으로 컨트롤러 메서드는 Authentication 객체에서 getName()을 통해 사용자 이름을 검색하고 인증된 사용자에 대해 로직을 수행할 수 있게 되어 응답 바디에 의도한 대로 적절한 데이터가 삽입되게 되는 것이다.
+// 불가능
+```
+
+하지만 정적 팩토리 메서드를 쓴다면 똑같은 타입을 파라미터로 받아도 네이밍이 달라지기 때문에 이러한 부분도 해결해준다.
+
+```java
+public static Timer CreateTimerWithHour(int hour)
+public static Timer CreateTimerWithMin(int min)
+```
+
+### 장점2. 호출될 때 마다 인스턴스를 반드시 새로 생성하지 않아도 된다.
+
+인스턴스를 미리 만들어놓거나 생성한 인스턴스를 캐싱하여 재활용하는 방식으로 불필요한 객체 생성을 피할 수 있다.
+
+이렇게 인스턴스의 생명 주기를 통제했을 때의 장점은 다양하다.
+
+- 싱글톤 가능
+- 인스턴스화가 불가능하도록 만들 수 있다.
+- 불변 값 클래스에서 동치인 인스턴스가 하나 뿐임을 보장할 수 있다.
+	- 캐싱을 통해 같은 값을 가진 인스턴스라면 캐싱된 인스턴스를 반환하도록 만들 수 있다.
+
+### 장점3. 반환 타입의 하위 타입 객체를 반환 가능하다.
+
+반환할 객체의 클래스를 하위 타입에 한해 자유롭게 선택할 수 있는 유연성을 가지고, 리턴 타입을 인터페이스로 지정해 구현체는 노출시키지 않을 수 있다.
+
+API를 만들 때 이러한 유연성을 응용한다면 구현 클래스를 공개하지 않고도 그 객체를 반환할 수 있어 API를 작게 유지할 수 있다.
+
+인터페이스만 노출되어 클라이언트 입장에서는 세부 구현 내용을 모르고 사용할 수 있는 것이다.
+
+
+### 장점4. 입력 매개변수에 따라 다른 클래스의 객체를 반환할 수 있다.
+
+```java
+public class TaxiServiceFactory {
+	public static TaxiService of(int price) {
+		if (price > 100_000) {
+			return new LuxTaxiService();
+		} else {
+			return new NormalTaxiService();
+		}
+	}
+}
+```
+
+위 코드는 장점 3과 4의 장점을 볼 수 있는 코드이다.
+
+반환 타입의 하위 타입이기만 하면 어떤 클래스의 객체를 반환해도 된다.
+
+위와 같은 느낌으로 EnumSet 클래스에서는 생성자 없이 public static 메서드로 allOf(), of() 등과 같은 메서드를 제공하는데 리턴되는 객체의 타입이 Enum 타입의 개수에 따라 ReqularEnumSet 또는 JumboEnumSet으로 달라진다.
+
+두 객체의 차이는 원소들을 변수로 관리하느냐 배열로 관리하느냐의 차이이다.
+
+결국 장점3과 4를 종합해보면 유연성에서 엄청난 강점을 보인다.
+
+### 장점 5. 정적 팩토리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다.
+
+인터페이스나 클래스가 만들어지는 시점에서 하위 타입의 클래스가 존재하지 않아도 나중에 만들 클래스가 기존의 인터페이스나 클래스를 상속받으면 언제든 의존성을 주입받아 사용가능하다.
+
+많이 사용되는 스프링의 DI도 이러한 원리를 이용한 것이다.
+
+## 단점
+
+그렇다면 정적 팩토리를 사용함에 있어 단점은 뭘까?
+
+### 단점 1. 상속을 하려면 public이나 protected 생성자가 필요한데 정적 팩토리 메서드만 제공한다면 하위 클래스를 만들 수 없다.
+
+이 예시로 java.util.Collections는 상속이 불가능하다.
+
+그러나 상속보다 컴포지션을 사용하도록 유도하고, 불변 타입으로 만들기 위해서는 이 제약을 지켜야 한다는 점에서 오히려 장점이 될 여지는 있다.
+
+컴포지션(아이템 18)과 불변 타입(아이템 17)에 관해서는 추후 해당 아이템 포스트에서 다룬다.
+
+### 단점 2. 개발자가 찾기 어렵다.
+
+생성자를 사용하면 Javadoc이 자동으로 상단에 모아 보여주는데 정적 팩토리 메서드는 그렇지 않다.
+
+## 정적 팩토리 메서드 컨벤션
+
+- from: 하나의 매개 변수를 받아 객체 생성
+- of: 여러 개의 매개 변수를 받아 객체 생성
+- valueOf: from과 of의 더 자세한 버전
+- getInstance | instance: 인스턴스를 생성 (이전에 반환했던 것과 같을 수 있다.)
+- newInstance | create: 새로운 인스턴스를 생성한다.
+- type: 다른 클래스에 팩터리 메서드를 정의할 때 사용한다.
+
+```java
+//type 예시
+List<Integer> list = Collections.list(legacyList);
+```
+
+## 정리
+
+보통 정적 팩터리 메서드의 사용이 유리한 경우가 많다. 무작정 public 생성자를 사용하기 보다는 객체의 생성에 있어 정적 팩토리 메서드의 사용을 고려하자.
