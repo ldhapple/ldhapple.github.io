@@ -2,7 +2,7 @@
 title: Effective Java 시작하기 + Item 1 (생성자 대신 정적 팩토리 메서드를 고려하라)
 author: leedohyun
 date: 2024-06-26 18:13:00 -0500
-categories: [Java, Effective-Java]
+categories: [JAVA, Effective-Java]
 tags: [Java, Effective Java]
 ---
 

@@ -2,7 +2,7 @@
 title: Item2 (생성자에 매개변수가 많다면 빌더를 고려하라)
 author: leedohyun
 date: 2024-06-27 18:13:00 -0500
-categories: [Java, Effective-Java]
+categories: [JAVA, Effective-Java]
 tags: [Java, Effective Java]
 ---
 
