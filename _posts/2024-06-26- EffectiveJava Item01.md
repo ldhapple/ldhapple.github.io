@@ -28,7 +28,7 @@ public static Timer createTimer(int hour, int min) {
 }
 ```
 
-위의 예시처럼 어떤 객체의 생성을 생성자가 아닌 정적 메서드를 통해 하는 것을 정적 팩토리 메서드라고 한다.
+위의 예시처럼 어떤 객체의 생성을 생성자가 아닌 정적 메서드를 통해 하는 것을 생각해보자.
 
 이러한 정적 팩토리 메서드를 사용하면 장점과 단점이 모두 존재한다. 우선 고려해보라고 하는 이유인 장점들을 보자.
 
@@ -112,9 +112,11 @@ public class TaxiServiceFactory {
 
 반환 타입의 하위 타입이기만 하면 어떤 클래스의 객체를 반환해도 된다.
 
-위와 같은 느낌으로 EnumSet 클래스에서는 생성자 없이 public static 메서드로 allOf(), of() 등과 같은 메서드를 제공하는데 리턴되는 객체의 타입이 Enum 타입의 개수에 따라 ReqularEnumSet 또는 JumboEnumSet으로 달라진다.
+위와 비슷한 방식으로 EnumSet 클래스에서는 생성자 없이 public static 메서드로 allOf(), of() 등과 같은 메서드를 제공하는데 리턴되는 객체의 타입이 Enum 타입의 개수에 따라 ReqularEnumSet 또는 JumboEnumSet으로 달라진다.
 
 두 객체의 차이는 원소들을 변수로 관리하느냐 배열로 관리하느냐의 차이이다.
+
+클라이언트는 어떤 객체가 반환되어도 인터페이스만 알고 있을 뿐 세부 구현 객체는 무엇이 반환되는지 알지 못한다.
 
 결국 장점3과 4를 종합해보면 유연성에서 엄청난 강점을 보인다.
 
@@ -145,8 +147,8 @@ public class TaxiServiceFactory {
 - from: 하나의 매개 변수를 받아 객체 생성
 - of: 여러 개의 매개 변수를 받아 객체 생성
 - valueOf: from과 of의 더 자세한 버전
-- getInstance | instance: 인스턴스를 생성 (이전에 반환했던 것과 같을 수 있다.)
-- newInstance | create: 새로운 인스턴스를 생성한다.
+- getInstance / instance: 인스턴스를 생성 (이전에 반환했던 것과 같을 수 있다.)
+- newInstance / create: 새로운 인스턴스를 생성한다.
 - type: 다른 클래스에 팩터리 메서드를 정의할 때 사용한다.
 
 ```java
