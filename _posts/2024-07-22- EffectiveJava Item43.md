@@ -100,13 +100,13 @@ t -> now.isAfter(t);
 ```java
 //메서드 참조
 List<String upperCaseWords = words.stream()
-									.map(String::toUpperCase)
-									.collect(Collectors.toList());
-
+				.map(String::toUpperCase)
+				.collect(Collectors.toList());
+									
 //람다
 List<String upperCaseWords = words.stream()
-									.map(word -> word.toUpperCase)
-									.collect(Collectors.toList());
+				.map(word -> word.toUpperCase)
+				.collect(Collectors.toList());
 ```
 
 - 클래스 생성자
