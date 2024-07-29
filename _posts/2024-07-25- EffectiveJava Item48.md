@@ -91,7 +91,7 @@ List<Integer> primes = Stream.iterate(1, n -> n + 1)
 ```
 
 - 성능이 153ms로 줄어들었다.
-	- 성능을 비교적 개선하지 못했다. 그리고 책 내용에 의하면 실행이 안되는 현상까지도 볼 수 있다.
+	- 성능을 비교적 개선하지 못했다. 그리고 책 내용에 의하면 실행이 끝마치지 못하는 현상까지도 볼 수 있다.
 	- limit을 10억까지 더 늘려보자.
 
 ![](https://blog.kakaocdn.net/dn/c8drTs/btsIPwhKSJY/xVS4zhPIBKhIb3uWVErRX0/img.png)
